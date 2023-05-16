@@ -1,0 +1,66 @@
+﻿@model  OnlineCourseWeb.Models.MenuLocationModel
+@{
+    ViewBag.Title = "Menu";
+}
+
+<h2>@ViewBag.result</h2>
+
+<div class="container">
+    <div id="content">
+        <ul id="tabs" class="nav nav-tabs" data-tabbs="tabs">
+            <li class="active">
+                <a href="#tab1" data-toggle="tab">Create Menu Location</a>
+            </li>
+            <li class="active">
+                <a href="#tab2" data-toggle="tab">List Menu Location</a>
+            </li>
+        </ul>
+        <div id="my-tab-content" class="tab-content">
+            <div class="tab-pane active" id="tab1">
+                <div class="row">
+                    <div id="menu">
+                        @using (Ajax.BeginForm("Menu", "Default", null, new AjaxOptions
+                        {
+                            HttpMethod = "POST",
+                            InsertionMode = InsertionMode.Replace,
+                            UpdateTargetId = "menu"
+                        }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <div class="form-group">
+                                <div>
+                                    @Html.TextBoxFor(m => m.Location)
+                                </div>
+                            </div>
+                            <button class="use-ajax">Process</button>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane active" id="tab2">
+                <div class="row">
+                    <div id="menu" class="col-lg-12">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <td>Id</td>
+                                    <td>Location</td>
+                                    <td>Action</td>
+                                </tr>
+                            </thead>
+                            <tbody class="tbody">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    
+</script>
