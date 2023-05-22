@@ -8,7 +8,7 @@ namespace OnlineCourseWeb.Models
 {
     public class MenuLocationModel
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string Location { get; set; }
         public int Links { get; set; }
     }

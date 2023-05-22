@@ -36,6 +36,7 @@ namespace OnlineCourseWeb.Controllers
             connection.Close();
             return View();
         }
+        [HttpGet]
         public ActionResult Menu()
         {
             return View();
@@ -52,7 +53,7 @@ namespace OnlineCourseWeb.Controllers
                     SqlCommand cmd = new SqlCommand("Menu", connection);
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add(new SqlParameter("@FilterId", "MenuLocation"));
+                    cmd.Parameters.Add(new SqlParameter("@FilterId", "MenuLocationList"));
                     cmd.Parameters.Add(new SqlParameter("@Location", model.Location));
 
                     cmd.ExecuteNonQuery();
@@ -77,7 +78,7 @@ namespace OnlineCourseWeb.Controllers
                 while (rdr.Read())
                 {
                     MenuLocationModel obj = new MenuLocationModel();
-                    obj.Id = (int)rdr.GetValue(0);
+                    obj.Id = rdr.GetValue(0).ToString();
                     obj.Location = rdr.GetValue(1).ToString();
                     models.Add(obj);
                 }
@@ -85,5 +86,37 @@ namespace OnlineCourseWeb.Controllers
             connection.Close();
             return Json(models.ToList(),JsonRequestBehavior.AllowGet);
         }
+
+        public JsonResult save(MenuLocationModel modelBind)
+        {
+            connection.Open();
+            if ((connection.State & System.Data.ConnectionState.Open) > 0)
+            {
+                SqlCommand cmd = new SqlCommand("Menu", connection);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@FilterId", "MenuLocationUpdate"));
+                cmd.Parameters.Add(new SqlParameter("@Location", modelBind.Location));
+                cmd.Parameters.Add(new SqlParameter("@Id", modelBind.Id));
+                rdr = cmd.ExecuteReader();
+            }
+            connection.Close();
+            return Json("done !");
+        }
+
+        public JsonResult delete(MenuLocationModel modelBind)
+        {
+            connection.Open();
+            if ((connection.State & System.Data.ConnectionState.Open) > 0)
+            {
+                SqlCommand cmd = new SqlCommand("Menu", connection);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@FilterId", "MenuLocationDelete"));
+                cmd.Parameters.Add(new SqlParameter("@Id", modelBind.Id));
+                rdr = cmd.ExecuteReader();
+            }
+            connection.Close();
+            return Json("done !");
+        }
+
     }
 }

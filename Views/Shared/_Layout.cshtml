@@ -7,15 +7,18 @@
     <link href="~/Content/Site.css" rel="stylesheet" type="text/css" />
     <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <script src="~/Scripts/modernizr-2.6.2.js"></script>
+    <script src="~/Scripts/jquery-3.3.1.mim.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
 
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
     <script>
+
         $(document).ready(function () {
+
+            var myMenuLocationTable;
+
             $(document).on("Click", ".use-ajax", function (e) {
                 e.preventDefault();
                 var form = $(this).closest('form');
@@ -32,12 +35,96 @@
                         renderData += '<tr>';
                         renderData += '<td>' + value.Id + '</td>';
                         renderData += '<td>' + value.Location + '</td>';
-                        renderData += '<td> <span value="' + value.Id + '" class="EditMenuLocationList">Edit</span> | <span value="' + value.Id + '" class="DeleteMenuLocationList">Delete</span> </td>';
+                        renderData += '<td> <span class="EditMenuLocationList">Edit</span> | <span class="DeleteMenuLocationList">Delete</span> </td>';
                         renderData += '<tr>';
                     });
                     $('.tbody').html(renderData);
+
+                   myMenuLocationTable = $('#menuTable').DataTable({
+                        "serching": false,
+                        "ordering": false,
+                        "lengthChange":false
+                      });
                 }
             });
+            $(document).on('click', '.DeleteMenuLocationList', function () {
+                var DID = $(this).parent().parent().childern().eq(0).text();
+                var menuObject = {
+                    Id: DID
+                };
+                $.ajax({
+                    url: "https://localhost:44395/Default/delete",
+                    data: JSON.stringify(menuObject),
+                    type: "POST",
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    success: function (result) {
+                        console.log(result);
+                        //$(this).parent().parent().remove();
+
+                        myMenuLocationTable.destroy();
+                        $('tbody').empty();
+                        $.ajax({
+                            url: "https://localhost:44395/Default/menuListJson",
+                            type: "GET",
+                            success: function (result) {
+                                console.log(result);
+                                var renderData = "";
+                                $.each(result, function (id, value) {
+                                    renderData += '<tr>';
+                                    renderData += '<td>' + value.Id + '</td>';
+                                    renderData += '<td>' + value.Location + '</td>';
+                                    renderData += '<td> <span class="EditMenuLocationList">Edit</span> | <span class="DeleteMenuLocationList">Delete</span> </td>';
+                                    renderData += '<tr>';
+                                });
+                                $('.tbody').html(renderData);
+
+                                myMenuLocationTable = $('#menuTable').DataTable({
+                                    "serching": false,
+                                    "ordering": false,
+                                    "lengthChange": false
+                                });
+                            }
+                        });
+
+                    error: function (result) {
+                        console.log(error);
+                    }
+                });
+            });
+
+            $(document).on('click', '.EditMenuLocationList', function () {
+                var textNode = $(this).parent().parent().childern()[1].innerHTML;
+                var fieldNode = "<input type = 'text' value='" + textNode + "'/>";
+                $(this).parent().parent().childern()[1].innerHTML = fieldNode;
+                $(this).parent().html('<span class="SaveMenuLocationList">Edit</span> | <span class="DeleteMenuLocationList">Delete</span>');
+            });
+
+            $(document).on('click', '.SaveMenuLocationList', function () {
+                var textNode = $(this).parent().parent().childern().childern().val();
+                var id = $(this).parent().parent().childern().eq(0).text();
+                $(this).parent().parent().childern()[1].innerHTML = textNode;
+
+                var menuObject = {
+                    Id: id,
+                    Location: textNode
+                };
+                $.ajax({
+                    url: "https://localhost:44395/Default/save",
+                    data: JSON.stringify(menuObject),
+                    type: "POST",
+                    contentType: "application/json;charset=utf-8",
+                    dataType:"json",
+                    success: function (result) {
+                        console.log(result);
+                    },
+                    error: function (result) {
+                        console.log(error);
+                    }
+                });
+                $(this).parent().html('<span class="SaveMenuLocationList">Edit</span> | <span class="DeleteMenuLocationList">Delete</span>');
+            });
+
         });
     </script>
 </head>
@@ -72,42 +159,42 @@
     <div class="container body-content">
         @RenderBody()
     </div>
-        <div class="bg-primary" style="margin-top: 20px;">
-            <footer class="container bg-primary" style="padding: 40px;">
-                <div class="row">
-                    <div class="col-lg-4">
-                        <div class="h3">About</div>
-                        <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</div>
-                    </div>
-                    <div class="col-lg-1"></div>
-                    <div class="col-lg-3">
-                        <div class="h3">Links</div>
-                        <div>
-                            <a href="" style="color: white;">Link</a><Br>
-                            <a href="" style="color: white;">Link</a><Br>
-                            <a href="" style="color: white;">Link</a><Br>
-                            <a href="" style="color: white;">Link</a><Br>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="h3">Contact</div>
-                        <div>
-                            <form>
-                                <div class="input-group">
-                                    <input type="text" name="" class="form-control" placeholder="Enter your email.">
-                                    <div class="input-group-btn">
-                                        <button class="btn btn-default" type="submit">
-                                            <i class="glyphicon glyphicon-envelope"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <br>
-                        <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</div>
+    <div class="bg-primary" style="margin-top: 20px;">
+        <footer class="container bg-primary" style="padding: 40px;">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="h3">About</div>
+                    <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</div>
+                </div>
+                <div class="col-lg-1"></div>
+                <div class="col-lg-3">
+                    <div class="h3">Links</div>
+                    <div>
+                        <a href="" style="color: white;">Link</a><Br>
+                        <a href="" style="color: white;">Link</a><Br>
+                        <a href="" style="color: white;">Link</a><Br>
+                        <a href="" style="color: white;">Link</a><Br>
                     </div>
                 </div>
-        </div>
+                <div class="col-lg-4">
+                    <div class="h3">Contact</div>
+                    <div>
+                        <form>
+                            <div class="input-group">
+                                <input type="text" name="" class="form-control" placeholder="Enter your email.">
+                                <div class="input-group-btn">
+                                    <button class="btn btn-default" type="submit">
+                                        <i class="glyphicon glyphicon-envelope"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <br>
+                    <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</div>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <script src="~/Scripts/jquery-1.10.2.min.js"></script>
