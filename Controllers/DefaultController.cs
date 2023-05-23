@@ -26,8 +26,8 @@ namespace OnlineCourseWeb.Controllers
                 SqlCommand cmd = new SqlCommand("Menu", connection);
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.Add(new SqlParameter("@FilterId", "MenuLocation"));
-                cmd.Parameters.Add(new SqlParameter("@Location", "TopBar"));
+                cmd.Parameters.Add(new SqlParameter("@FilterId", "MenuLocationList"));
+                //cmd.Parameters.Add(new SqlParameter("@Location", "TopBar"));
 
                 rdr = cmd.ExecuteReader();
 
@@ -36,7 +36,6 @@ namespace OnlineCourseWeb.Controllers
             connection.Close();
             return View();
         }
-        [HttpGet]
         public ActionResult Menu()
         {
             return View();
@@ -53,7 +52,7 @@ namespace OnlineCourseWeb.Controllers
                     SqlCommand cmd = new SqlCommand("Menu", connection);
                     cmd.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.Add(new SqlParameter("@FilterId", "MenuLocationList"));
+                    cmd.Parameters.Add(new SqlParameter("@FilterId", "MenuLocation"));
                     cmd.Parameters.Add(new SqlParameter("@Location", model.Location));
 
                     cmd.ExecuteNonQuery();
@@ -118,5 +117,51 @@ namespace OnlineCourseWeb.Controllers
             return Json("done !");
         }
 
+
+        public ActionResult Links()
+        {
+            return View();
+        }
+
+        public JsonResult InsertLinks(ModelLinks modelBind)
+        {
+            connection.Open();
+            if ((connection.State & System.Data.ConnectionState.Open) > 0)
+            {
+                SqlCommand cmd = new SqlCommand("Menu", connection);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@FilterId", "Insert_MenuLinks"));
+
+                cmd.Parameters.Add(new SqlParameter("@MenuLocId", modelBind.MenuLocId));
+                cmd.Parameters.Add(new SqlParameter("@LinksName", modelBind.LinksName));
+                cmd.Parameters.Add(new SqlParameter("@LinksURL", modelBind.LinksURL));
+                rdr = cmd.ExecuteReader();
+            }
+            connection.Close();
+            return Json("done !");
+        }
+
+
+        public JsonResult LinksMenuListJson()
+        {
+            List<MenuLocationModel> models = new List<MenuLocationModel>();
+            connection.Open();
+            if ((connection.State & System.Data.ConnectionState.Open) > 0)
+            {
+                SqlCommand cmd = new SqlCommand("Menu", connection);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add(new SqlParameter("@FilterId", "MenuLocationDropDown"));
+                rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    MenuLocationModel obj = new MenuLocationModel();
+                    obj.Id = rdr.GetValue(0).ToString();
+                    obj.Location = rdr.GetValue(1).ToString();
+                    models.Add(obj);
+                }
+            }
+            connection.Close();
+            return Json(models.ToList(), JsonRequestBehavior.AllowGet);
+        }
     }
 }
